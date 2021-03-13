@@ -22,7 +22,7 @@ gradlePlugin {
     plugins {
         main {
             id = 'nl.voidgroup.gradle.bukkit-plugin-helper'
-            implementationClass = 'nl.voidgroup.gradle.bukkit-plugin-helper.BukkitPluginHelper'
+            implementationClass = 'nl.voidgroup.gradle.bukkit.plugin.helper.BukkitPluginHelper'
         }
     }
 }
