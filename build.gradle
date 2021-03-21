@@ -5,3 +5,5 @@ plugins {
 
 group 'nl.voidgroup.gradle.plugin'
 version '0.0.1-dev-002'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
