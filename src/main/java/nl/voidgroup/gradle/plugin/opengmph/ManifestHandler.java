@@ -1,5 +1,7 @@
 package nl.voidgroup.gradle.plugin.opengmph;
 
+
+
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -18,7 +20,7 @@ public class ManifestHandler {
      * @throws IOException when a connection cannot be opened tho the jar
      */
     public ManifestHandler() throws IOException {
-        URL jarURL = getClass().getProtectionDomain().getCodeSource().getLocation();
+        URL jarURL = getClass().getResource("/" + getClass().getCanonicalName().replace('.', '/') + ".class");
         JarURLConnection jarConnection = (JarURLConnection) jarURL.openConnection();
         Manifest jarManifest = jarConnection.getManifest();
         jarAttributes = jarManifest.getMainAttributes();
