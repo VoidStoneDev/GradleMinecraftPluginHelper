@@ -27,6 +27,9 @@ public abstract class Logger {
     public abstract void quiet(String msg);
     public abstract void quiet(String msg, Throwable cause);
 
+    public abstract void lifecycle(String msg);
+    public abstract void lifecycle(String msg, Throwable cause);
+
     public org.gradle.api.logging.Logger getGradleLogger() {
         return gradleLogger;
     }
@@ -84,6 +87,16 @@ public abstract class Logger {
             @Override
             public void quiet(String msg, Throwable cause) {
                 getGradleLogger().quiet("<" + getName() + "> " + msg, cause);
+            }
+
+            @Override
+            public void lifecycle(String msg) {
+                getGradleLogger().lifecycle(msg);
+            }
+
+            @Override
+            public void lifecycle(String msg, Throwable cause) {
+                getGradleLogger().lifecycle(msg, cause);
             }
         };
     }
