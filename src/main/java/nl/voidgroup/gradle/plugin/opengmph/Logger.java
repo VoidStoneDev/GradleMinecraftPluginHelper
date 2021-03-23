@@ -91,12 +91,12 @@ public abstract class Logger {
 
             @Override
             public void lifecycle(String msg) {
-                getGradleLogger().lifecycle(msg);
+                getGradleLogger().lifecycle("<" + getName() + "> " + msg);
             }
 
             @Override
             public void lifecycle(String msg, Throwable cause) {
-                getGradleLogger().lifecycle(msg, cause);
+                getGradleLogger().lifecycle("<" + getName() + "> " + msg, cause);
             }
         };
     }
