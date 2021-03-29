@@ -1,7 +1,9 @@
 package nl.voidgroup.gradle.plugin.opengmph;
 
+import groovy.lang.Closure;
 import nl.voidgroup.gradle.plugin.opengmph.annotation.ServerAPI;
 import nl.voidgroup.gradle.plugin.opengmph.annotation.Repository;
+import nl.voidgroup.gradle.plugin.opengmph.annotation.YMLGen;
 import nl.voidgroup.gradle.plugin.opengmph.data.minecraft.MinecraftServer;
 import nl.voidgroup.gradle.plugin.opengmph.data.minecraft.MinecraftVersion;
 import nl.voidgroup.gradle.plugin.opengmph.extension.PluginData;
@@ -9,6 +11,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.jvm.tasks.Jar;
 
 import javax.annotation.Nonnull;
 import java.util.regex.Pattern;
@@ -64,6 +67,7 @@ public class OpenGMPH implements Plugin<Project> {
         logger.lifecycle("Using version: " + name + "@" + version);
         logger.debug("Registering extension: '" + PLUGIN_DATA_EXTENSION + "'");
         PluginData pluginData = project.getExtensions().create(PLUGIN_DATA_EXTENSION, PluginData.class);
+        project.getTasks().create("genYML", nl.voidgroup.gradle.plugin.opengmph.task.YMLGen.class);
         project.afterEvaluate(_project -> {
             Logger _logger = Logger.getLogger(getClass(), name);
             _logger.debug("Starting Project#afterEvaluate");
@@ -113,6 +117,28 @@ public class OpenGMPH implements Plugin<Project> {
                 Configuration compileOnlyConfig = _project.getConfigurations().getByName("compileOnly");
                 _logger.debug("Importing: " + serverAPIData.group() + ":" + serverAPIData.id() + ":" + apiVersion);
                 compileOnlyConfig.getDependencies().add(_project.getDependencies().create(serverAPIData.group() + ":" + serverAPIData.id() + ":" + apiVersion));
+            }
+            if(pluginData.generateYML) {
+                _logger.debug("Setting up generate yml auto execute");
+                _logger.debug("Checking for YMLGen annotation");
+                MinecraftServer targetServer = Util.requireNonNull(MinecraftServer.getByName(Util.requireNonNull(pluginData.targetServer, "Target server not set")), "Invalid target server");
+                if(!targetServer.getClass().isAnnotationPresent(nl.voidgroup.gradle.plugin.opengmph.annotation.YMLGen.class)) {
+                    throw new UnsupportedOperationException("Current target server does not support yml generation");
+                }
+                _logger.debug("Getting YMLGen annotation");
+                YMLGen serverGenData = targetServer.getClass().getAnnotation(YMLGen.class);
+                _logger.debug("Using file: " + serverGenData.file());
+                _logger.debug("Using handler: " + serverGenData.handler().getCanonicalName());
+                Jar jarTask = (Jar) _project.getTasks().getByName("jar");
+                jarTask.dependsOn("genYML");
+                Object pluginDataContainer = null;
+                try{
+                    pluginDataContainer = serverGenData.handler().getConstructor().newInstance().getPluginDataContainer();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                pluginData.ymlData.setDelegate(pluginDataContainer);
+                pluginData.ymlData.setResolveStrategy(Closure.DELEGATE_FIRST);
             }
         });
     }

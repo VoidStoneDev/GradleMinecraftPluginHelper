@@ -12,4 +12,7 @@ public class Util {
     public static <T> T requireNonNull(T obj, String msg) {
         return requireNonNull(obj, new NullPointerException(msg));
     }
+    public static boolean isNull(Object obj) {
+        return obj == null;
+    }
 }
